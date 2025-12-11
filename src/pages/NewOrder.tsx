@@ -147,7 +147,7 @@ export default function NewOrder() {
             Promise.all(phoneNumbers.map(async (phone) => {
                 if (!phone) return;
                 try {
-                    await fetch('http://localhost:3000/api/send', {
+                    await fetch('http://localhost:3001/api/send', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({ phone, message })

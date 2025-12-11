@@ -35,7 +35,7 @@ export default function WhatsAppSetup() {
 
   const fetchStatus = async () => {
     try {
-      const res = await fetch('http://localhost:3000/api/status');
+      const res = await fetch('http://localhost:3001/api/status');
       const data = await res.json();
       setStatus(data);
       setError('');
@@ -62,7 +62,7 @@ export default function WhatsAppSetup() {
     setError('');
 
     try {
-      const res = await fetch('http://localhost:3000/api/pair', {
+      const res = await fetch('http://localhost:3001/api/pair', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ phone: phoneNumber.replace(/[^0-9]/g, '') })
@@ -108,7 +108,7 @@ export default function WhatsAppSetup() {
                   setConfirmModal(prev => ({ ...prev, isOpen: false }));
                   setLoading(true);
                   try {
-                    await fetch('http://localhost:3000/api/reset', { method: 'POST' });
+                    await fetch('http://localhost:3001/api/reset', { method: 'POST' });
                     toast.success('Koneksi direset');
                   } catch (e) {
                     console.error(e);
@@ -196,7 +196,7 @@ export default function WhatsAppSetup() {
                   onClick={async () => {
                     setLoading(true);
                     try {
-                      await fetch('http://localhost:3000/api/reset', { method: 'POST' });
+                      await fetch('http://localhost:3001/api/reset', { method: 'POST' });
                       await new Promise(r => setTimeout(r, 2000));
                     } catch (e) {
                       console.error(e);

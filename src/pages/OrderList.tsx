@@ -162,7 +162,7 @@ export default function OrderList() {
                         for (const phone of phoneNumbers) {
                             if (!phone) continue;
                             try {
-                                const res = await fetch('http://localhost:3000/api/send', {
+                                const res = await fetch('http://localhost:3001/api/send', {
                                     method: 'POST',
                                     headers: { 'Content-Type': 'application/json' },
                                     body: JSON.stringify({ phone, message })
@@ -248,7 +248,7 @@ export default function OrderList() {
                     for (const phone of phoneNumbers) {
                         if (!phone) continue;
                         try {
-                            const res = await fetch('http://localhost:3000/api/send', {
+                            const res = await fetch('http://localhost: n /api/send', {
                                 method: 'POST',
                                 headers: { 'Content-Type': 'application/json' },
                                 body: JSON.stringify({

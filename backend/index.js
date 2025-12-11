@@ -246,7 +246,7 @@ app.post('/api/reset', async (c) => {
   }
 });
 
-const port = 3000;
+const port = 3001;
 console.log(`Server running on http://localhost:${port}`);
 console.log('Open http://localhost:5173 to connect WhatsApp');
 

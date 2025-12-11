@@ -26,7 +26,7 @@ export default function WhatsAppPage() {
                 setConfirmModal(prev => ({ ...prev, isOpen: false }));
                 const toastId = toast.loading('Mereset koneksi WhatsApp...');
                 try {
-                    const response = await fetch('http://localhost:3000/api/reset', {
+                    const response = await fetch('http://localhost:3001/api/reset', {
                         method: 'POST',
                     });
                     const data = await response.json();
