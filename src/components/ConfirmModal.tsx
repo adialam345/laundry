@@ -53,8 +53,8 @@ export default function ConfirmModal({
                             onClick={onConfirm}
                             disabled={isLoading}
                             className={`px-5 py-2.5 rounded-xl font-bold text-white shadow-lg transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed ${isDangerous
-                                    ? 'bg-red-500 hover:bg-red-600 shadow-red-500/20'
-                                    : 'bg-emerald-500 hover:bg-emerald-600 shadow-emerald-500/20'
+                                ? 'bg-red-500 hover:bg-red-600 shadow-red-500/20'
+                                : 'bg-emerald-500 hover:bg-emerald-600 shadow-emerald-500/20'
                                 }`}
                         >
                             {isLoading ? 'Memproses...' : confirmText}

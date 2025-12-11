@@ -3,6 +3,7 @@ import { supabase } from '../lib/supabase';
 import { Plus, Trash2, Save, Loader2, Settings as SettingsIcon, Edit2, X, Clock, Tag, FileText } from 'lucide-react';
 import toast from 'react-hot-toast';
 import ConfirmModal from '../components/ConfirmModal';
+import CustomSelect from '../components/CustomSelect';
 
 interface Service {
     id: string;
@@ -118,6 +119,8 @@ export default function Settings() {
         });
     };
 
+
+
     return (
         <div className="page-container">
             <div className="page-header">
@@ -174,14 +177,15 @@ export default function Settings() {
                                 </div>
                                 <div className="space-y-3">
                                     <label className="text-base font-semibold text-slate-700">Satuan</label>
-                                    <select
-                                        value={currentService.unit_type}
-                                        onChange={e => setCurrentService({ ...currentService, unit_type: e.target.value as 'kg' | 'pcs' })}
-                                        className="input-field"
-                                    >
-                                        <option value="kg">Per Kg</option>
-                                        <option value="pcs">Per Pcs</option>
-                                    </select>
+                                    <CustomSelect
+                                        value={currentService.unit_type || 'kg'}
+                                        onChange={(val) => setCurrentService({ ...currentService, unit_type: val as 'kg' | 'pcs' })}
+                                        options={[
+                                            { value: 'kg', label: 'Per Kg' },
+                                            { value: 'pcs', label: 'Per Pcs' }
+                                        ]}
+                                        className="w-full"
+                                    />
                                 </div>
                             </div>
 

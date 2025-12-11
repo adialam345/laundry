@@ -6,6 +6,8 @@ import { Boom } from '@hapi/boom';
 import pino from 'pino';
 import qrcode from 'qrcode-terminal';
 import * as readline from 'readline';
+import fs from 'fs/promises';
+import path from 'path';
 
 const app = new Hono();
 let sock;
@@ -216,9 +218,18 @@ app.post('/api/reset', async (c) => {
       sock.end();
     }
 
-    // We can't easily delete the folder while the process is running due to file locks,
-    // but we can try to clear the state or at least signal the user to restart.
-    // For now, we'll try to re-initialize.
+    // Wait for socket to close
+    await new Promise(resolve => setTimeout(resolve, 1000));
+
+    const authPath = path.join(process.cwd(), 'auth_info');
+
+    try {
+      await fs.rm(authPath, { recursive: true, force: true });
+      console.log('auth_info directory deleted');
+    } catch (err) {
+      console.error('Error deleting auth_info:', err);
+      // Continue even if delete fails (might be partially deleted or locked)
+    }
 
     isConnected = false;
     connectionStatus = 'disconnected';
@@ -228,7 +239,7 @@ app.post('/api/reset', async (c) => {
     console.log('Resetting connection...');
     await connectToWhatsApp();
 
-    return c.json({ success: true, message: 'Connection reset initiated' });
+    return c.json({ success: true, message: 'Connection reset and auth_info deleted' });
   } catch (error) {
     console.error('Error resetting:', error);
     return c.json({ success: false, error: error.message }, 500);

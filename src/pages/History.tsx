@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { supabase } from '../lib/supabase';
 import { CheckCircle, Search, Calendar, FileText, DollarSign, Loader2, Filter } from 'lucide-react';
 import { useInfiniteScroll } from '../hooks/useInfiniteScroll';
+import CustomSelect from '../components/CustomSelect';
 
 interface Order {
     id: string;
@@ -128,34 +129,28 @@ export default function OrderHistory() {
 
                 <div className="flex flex-col md:flex-row gap-3 w-full md:w-auto">
                     {/* Filters */}
-                    <div className="flex gap-2">
-                        <div className="relative">
-                            <select
-                                value={selectedMonth}
-                                onChange={(e) => setSelectedMonth(e.target.value)}
-                                className="appearance-none bg-white border border-slate-200 text-slate-700 py-2.5 pl-4 pr-10 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 font-medium cursor-pointer"
-                            >
-                                <option value="all">Semua Bulan</option>
-                                {months.map(m => (
-                                    <option key={m.value} value={m.value}>{m.label}</option>
-                                ))}
-                            </select>
-                            <Calendar className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
-                        </div>
+                    <div className="flex gap-3">
+                        <CustomSelect
+                            value={selectedMonth}
+                            onChange={setSelectedMonth}
+                            options={[
+                                { value: 'all', label: 'Semua Bulan' },
+                                ...months
+                            ]}
+                            icon={Calendar}
+                            className="w-44"
+                        />
 
-                        <div className="relative">
-                            <select
-                                value={selectedYear}
-                                onChange={(e) => setSelectedYear(e.target.value)}
-                                className="appearance-none bg-white border border-slate-200 text-slate-700 py-2.5 pl-4 pr-10 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 font-medium cursor-pointer"
-                            >
-                                <option value="all">Semua Tahun</option>
-                                {years.map(y => (
-                                    <option key={y} value={y}>{y}</option>
-                                ))}
-                            </select>
-                            <Filter className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
-                        </div>
+                        <CustomSelect
+                            value={selectedYear}
+                            onChange={setSelectedYear}
+                            options={[
+                                { value: 'all', label: 'Semua Tahun' },
+                                ...years.map(y => ({ value: y, label: y }))
+                            ]}
+                            icon={Filter}
+                            className="w-40"
+                        />
                     </div>
 
                     {/* Search */}
