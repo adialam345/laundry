@@ -452,7 +452,7 @@ export default function OrderList() {
 
             {/* Bulk Action Bar */}
             {selectedOrderIds.size > 0 && (
-                <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 bg-slate-900 text-white px-6 py-4 rounded-2xl shadow-2xl flex items-center gap-6 animate-in slide-in-from-bottom-10 duration-300">
+                <div className="fixed bottom-24 md:bottom-6 left-1/2 -translate-x-1/2 z-50 bg-slate-900 text-white px-6 py-4 rounded-2xl shadow-2xl flex items-center gap-6 animate-in slide-in-from-bottom-10 duration-300 w-[90%] md:w-auto justify-between md:justify-start">
                     <div className="font-semibold text-lg">
                         {selectedOrderIds.size} Pesanan Dipilih
                     </div>
