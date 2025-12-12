@@ -5,17 +5,26 @@
 @tailwind utilities;
 
 @layer base {
+    * {
+        box-sizing: border-box;
+    }
+
     html {
-        font-size: 16px;
+        font-size: 16px !important;
         -webkit-text-size-adjust: 100%;
         -moz-text-size-adjust: 100%;
         -ms-text-size-adjust: 100%;
         text-size-adjust: 100%;
+        zoom: 1;
     }
 
     body {
-        @apply font-sans bg-slate-50 text-slate-900 antialiased text-base;
+        @apply font-sans bg-slate-50 text-slate-900 antialiased;
         font-family: 'Inter', sans-serif;
+        font-size: 16px !important;
+        line-height: 1.5;
+        margin: 0;
+        padding: 0;
     }
 
     /* Custom Scrollbar */
