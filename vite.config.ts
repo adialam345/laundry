@@ -14,13 +14,16 @@ export default defineConfig({
       '/api': {
         target: 'http://localhost:3001',
         changeOrigin: true,
+        secure: false,
       },
     },
     hmr: {
-      clientPort: 443
+      host: 'laundry.antarixa.qzz.io',
+      clientPort: 443,
+      protocol: 'wss'
     },
     watch: {
-      ignored: ['**/auth_info/**', '**/backend/**']
+      ignored: ['**/auth_info/**', '**/backend/**', '**/node_modules/**', '**/.git/**']
     }
   }
 })
