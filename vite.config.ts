@@ -17,9 +17,7 @@ export default defineConfig({
       },
     },
     hmr: {
-      host: 'laundry.antarixa.qzz.io',
-      clientPort: 443,
-      protocol: 'wss'
+      clientPort: 443
     }
   }
 })
