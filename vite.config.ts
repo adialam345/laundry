@@ -18,6 +18,9 @@ export default defineConfig({
     },
     hmr: {
       clientPort: 443
+    },
+    watch: {
+      ignored: ['**/auth_info/**', '**/backend/**']
     }
   }
 })
