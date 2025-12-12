@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import { Save, Loader2, Calculator, Scale, User, Phone, CheckCircle2, Clock } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { getApiUrl } from '../lib/api';
 
 interface Service {
     id: string;
@@ -147,7 +148,7 @@ export default function NewOrder() {
             Promise.all(phoneNumbers.map(async (phone) => {
                 if (!phone) return;
                 try {
-                    await fetch('http://localhost:3001/api/send', {
+                    await fetch(getApiUrl('/api/send'), {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({ phone, message })

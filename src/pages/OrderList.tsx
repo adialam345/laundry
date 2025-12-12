@@ -4,6 +4,7 @@ import { CheckCircle, Clock, Loader2, Search, Phone, Calendar, CheckSquare, Squa
 import toast from 'react-hot-toast';
 import ConfirmModal from '../components/ConfirmModal';
 import { useInfiniteScroll } from '../hooks/useInfiniteScroll';
+import { getApiUrl } from '../lib/api';
 
 interface Order {
     id: string;
@@ -162,7 +163,7 @@ export default function OrderList() {
                         for (const phone of phoneNumbers) {
                             if (!phone) continue;
                             try {
-                                const res = await fetch('http://localhost:3001/api/send', {
+                                const res = await fetch(getApiUrl('/api/send'), {
                                     method: 'POST',
                                     headers: { 'Content-Type': 'application/json' },
                                     body: JSON.stringify({ phone, message })
@@ -248,7 +249,7 @@ export default function OrderList() {
                     for (const phone of phoneNumbers) {
                         if (!phone) continue;
                         try {
-                            const res = await fetch('http://localhost: n /api/send', {
+                            const res = await fetch(getApiUrl('/api/send'), {
                                 method: 'POST',
                                 headers: { 'Content-Type': 'application/json' },
                                 body: JSON.stringify({

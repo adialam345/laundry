@@ -4,6 +4,8 @@ import { Smartphone, RefreshCw } from 'lucide-react';
 import toast from 'react-hot-toast';
 import ConfirmModal from '../components/ConfirmModal';
 
+import { getApiUrl } from '../lib/api';
+
 export default function WhatsAppPage() {
     const [confirmModal, setConfirmModal] = useState<{
         isOpen: boolean;
@@ -26,7 +28,7 @@ export default function WhatsAppPage() {
                 setConfirmModal(prev => ({ ...prev, isOpen: false }));
                 const toastId = toast.loading('Mereset koneksi WhatsApp...');
                 try {
-                    const response = await fetch('http://localhost:3001/api/reset', {
+                    const response = await fetch(getApiUrl('/api/reset'), {
                         method: 'POST',
                     });
                     const data = await response.json();

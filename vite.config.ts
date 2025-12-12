@@ -1,10 +1,14 @@
-import { defineConfig } from 'vite';
-import react from '@vitejs/plugin-react';
+import { defineConfig } from 'vite'
+import react from '@vitejs/plugin-react'
 
-// https://vitejs.dev/config/
 export default defineConfig({
   plugins: [react()],
   optimizeDeps: {
     exclude: ['lucide-react'],
   },
-});
+  server: {
+    host: true, // wajib agar bisa diakses dari reverse proxy
+    port: 5173, // samakan dengan ProxyPass Apache
+    allowedHosts: ['laundry.antarixa.qzz.io'], // domain yang diizinkan
+  }
+})

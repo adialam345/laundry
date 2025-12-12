@@ -3,6 +3,7 @@ import { QRCodeSVG } from 'qrcode.react';
 import { Smartphone, RefreshCw, CheckCircle, XCircle, Loader2, Phone, Link2, LogOut, Clock } from 'lucide-react';
 import toast from 'react-hot-toast';
 import ConfirmModal from './ConfirmModal';
+import { getApiUrl } from '../lib/api';
 
 interface StatusResponse {
   connected: boolean;
@@ -35,7 +36,7 @@ export default function WhatsAppSetup() {
 
   const fetchStatus = async () => {
     try {
-      const res = await fetch('http://localhost:3001/api/status');
+      const res = await fetch(getApiUrl('/api/status'));
       const data = await res.json();
       setStatus(data);
       setError('');
@@ -62,7 +63,7 @@ export default function WhatsAppSetup() {
     setError('');
 
     try {
-      const res = await fetch('http://localhost:3001/api/pair', {
+      const res = await fetch(getApiUrl('/api/pair'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ phone: phoneNumber.replace(/[^0-9]/g, '') })
@@ -108,7 +109,7 @@ export default function WhatsAppSetup() {
                   setConfirmModal(prev => ({ ...prev, isOpen: false }));
                   setLoading(true);
                   try {
-                    await fetch('http://localhost:3001/api/reset', { method: 'POST' });
+                    await fetch(getApiUrl('/api/reset'), { method: 'POST' });
                     toast.success('Koneksi direset');
                   } catch (e) {
                     console.error(e);
@@ -196,7 +197,7 @@ export default function WhatsAppSetup() {
                   onClick={async () => {
                     setLoading(true);
                     try {
-                      await fetch('http://localhost:3001/api/reset', { method: 'POST' });
+                      await fetch(getApiUrl('/api/reset'), { method: 'POST' });
                       await new Promise(r => setTimeout(r, 2000));
                     } catch (e) {
                       console.error(e);
