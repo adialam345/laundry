@@ -17,11 +17,7 @@ export default defineConfig({
         secure: false,
       },
     },
-    hmr: {
-      host: 'laundry.antarixa.qzz.io',
-      clientPort: 443,
-      protocol: 'wss'
-    },
+    hmr: false,
     watch: {
       ignored: ['**/auth_info/**', '**/backend/**', '**/node_modules/**', '**/.git/**']
     }
