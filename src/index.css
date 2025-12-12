@@ -10,18 +10,19 @@
     }
 
     html {
-        font-size: 16px !important;
+        font-size: 12.8px !important;
+        /* 80% of 16px = 12.8px */
         -webkit-text-size-adjust: 100%;
         -moz-text-size-adjust: 100%;
         -ms-text-size-adjust: 100%;
         text-size-adjust: 100%;
-        zoom: 1;
     }
 
     body {
         @apply font-sans bg-slate-50 text-slate-900 antialiased;
         font-family: 'Inter', sans-serif;
-        font-size: 16px !important;
+        font-size: 12.8px !important;
+        /* 80% of 16px = 12.8px */
         line-height: 1.5;
         margin: 0;
         padding: 0;
