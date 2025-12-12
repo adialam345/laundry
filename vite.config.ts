@@ -7,8 +7,19 @@ export default defineConfig({
     exclude: ['lucide-react'],
   },
   server: {
-    host: true, // wajib agar bisa diakses dari reverse proxy
-    port: 5173, // samakan dengan ProxyPass Apache
-    allowedHosts: ['laundry.antarixa.qzz.io'], // domain yang diizinkan
+    host: true,
+    port: 5173,
+    allowedHosts: ['laundry.antarixa.qzz.io'],
+    proxy: {
+      '/api': {
+        target: 'http://localhost:3001',
+        changeOrigin: true,
+      },
+    },
+    hmr: {
+      host: 'laundry.antarixa.qzz.io',
+      clientPort: 443,
+      protocol: 'wss'
+    }
   }
 })
