@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react';
 import { supabase } from '../lib/supabase';
-import { CheckCircle, Clock, Loader2, Search, Phone, Calendar, CheckSquare, Square, Send, Edit, Trash2 } from 'lucide-react';
+import { CheckCircle, Clock, Loader2, Search, Phone, Calendar, CheckSquare, Square, Send, Edit, Trash2, Printer } from 'lucide-react';
 import toast from 'react-hot-toast';
 import ConfirmModal from '../components/ConfirmModal';
+import InvoiceModal from '../components/InvoiceModal';
 import { useInfiniteScroll } from '../hooks/useInfiniteScroll';
 import { getApiUrl } from '../lib/api';
 import { useNavigate } from 'react-router-dom';
@@ -29,6 +30,7 @@ export default function OrderList() {
     const [hasMore, setHasMore] = useState(true);
     const [activeTab, setActiveTab] = useState('all');
     const [selectedOrderIds, setSelectedOrderIds] = useState<Set<string>>(new Set());
+    const [selectedInvoiceOrder, setSelectedInvoiceOrder] = useState<Order | null>(null);
     const [isBulkSending, setIsBulkSending] = useState(false);
     const ITEMS_PER_PAGE = 10;
 
@@ -319,6 +321,10 @@ export default function OrderList() {
         });
     };
 
+    const handlePrint = (order: Order) => {
+        setSelectedInvoiceOrder(order);
+    };
+
     const filteredOrders = orders.filter(order =>
         order.customer_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
         order.invoice_number.toLowerCase().includes(searchTerm.toLowerCase())
@@ -386,74 +392,84 @@ export default function OrderList() {
             ) : (
                 <div className="grid grid-cols-1 gap-6">
                     {filteredOrders.map((order) => (
-                        <div key={order.id} className={`glass-card p-8 rounded-2xl flex flex-col md:flex-row items-start md:items-center justify-between gap-8 group animate-in fade-in slide-in-from-bottom-2 duration-500 transition-all border-2 ${selectedOrderIds.has(order.id) ? 'border-emerald-500 bg-emerald-50/30' : 'border-transparent'}`}>
-                            <div className="flex items-start gap-6 w-full">
+                        <div key={order.id} className={`glass-card p-5 rounded-xl flex flex-col xl:flex-row items-start xl:items-center justify-between gap-4 group animate-in fade-in slide-in-from-bottom-2 duration-500 transition-all border ${selectedOrderIds.has(order.id) ? 'border-emerald-500 bg-emerald-50/30' : 'border-transparent'}`}>
+                            <div className="flex items-start gap-4 w-full">
                                 <button
                                     onClick={() => toggleSelectOrder(order.id)}
                                     className="mt-1 flex-shrink-0 text-slate-400 hover:text-emerald-500 transition-colors"
                                 >
                                     {selectedOrderIds.has(order.id) ? (
-                                        <CheckSquare className="w-6 h-6 text-emerald-500" />
+                                        <CheckSquare className="w-5 h-5 text-emerald-500" />
                                     ) : (
-                                        <Square className="w-6 h-6" />
+                                        <Square className="w-5 h-5" />
                                     )}
                                 </button>
 
-                                <div className={`w-16 h-16 rounded-2xl flex items-center justify-center flex-shrink-0 shadow-lg ${order.status === 'ready'
+                                <div className={`w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 shadow-sm ${order.status === 'ready'
                                     ? 'bg-emerald-50 text-emerald-600 shadow-emerald-500/10'
                                     : 'bg-blue-50 text-blue-600 shadow-blue-500/10'
                                     }`}>
-                                    {order.status === 'ready' ? <CheckCircle className="w-8 h-8" /> : <Clock className="w-8 h-8" />}
+                                    {order.status === 'ready' ? <CheckCircle className="w-6 h-6" /> : <Clock className="w-6 h-6" />}
                                 </div>
-                                <div className="flex-1">
-                                    <div className="flex items-center gap-4 mb-2">
-                                        <h3 className="text-xl font-bold text-slate-900">{order.customer_name}</h3>
-                                        <span className="text-sm font-mono bg-slate-100 border border-slate-200 px-2.5 py-0.5 rounded text-slate-500">{order.invoice_number}</span>
+                                <div className="flex-1 min-w-0">
+                                    <div className="flex items-center gap-3 mb-1.5 flex-wrap">
+                                        <h3 className="text-base font-bold text-slate-900 truncate">{order.customer_name}</h3>
+                                        <span className="text-xs font-mono bg-slate-100 border border-slate-200 px-2 py-0.5 rounded text-slate-500 whitespace-nowrap">{order.invoice_number}</span>
                                     </div>
-                                    <div className="flex flex-wrap items-center gap-x-6 gap-y-2 text-base text-slate-500">
-                                        <span className="text-emerald-600 font-semibold">{order.service_type}</span>
-                                        <span className="flex items-center gap-2"><Phone className="w-4 h-4" /> {order.customer_phone}</span>
-                                        <span className="flex items-center gap-2"><Calendar className="w-4 h-4" /> Estimasi: {new Date(order.target_completion_time).toLocaleString('id-ID', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}</span>
+                                    <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-slate-500">
+                                        <span className="text-emerald-600 font-semibold truncate max-w-[200px]">{order.service_type}</span>
+                                        <span className="flex items-center gap-1.5 whitespace-nowrap"><Phone className="w-3.5 h-3.5" /> {order.customer_phone}</span>
+                                        <span className="flex items-center gap-1.5 whitespace-nowrap"><Calendar className="w-3.5 h-3.5" /> Est: {new Date(order.target_completion_time).toLocaleString('id-ID', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}</span>
                                     </div>
                                 </div>
                             </div>
 
-                            <div className="w-full md:w-auto flex flex-col md:flex-row items-center gap-3 pl-12 md:pl-0">
+                            <div className="w-full xl:w-auto flex flex-wrap md:flex-nowrap items-center gap-2 pl-12 xl:pl-0">
+                                {/* Print Button */}
+                                <button
+                                    onClick={() => handlePrint(order)}
+                                    className="flex-1 md:flex-none btn-secondary flex items-center justify-center gap-2 py-2.5 px-4 text-sm font-semibold border-slate-200 text-slate-700 hover:bg-slate-50 min-w-0"
+                                    title="Cetak Struk"
+                                >
+                                    <Printer className="w-4 h-4" />
+                                    <span className="inline">Struk</span>
+                                </button>
+
                                 {/* Edit Button */}
                                 <button
                                     onClick={() => handleEdit(order.id)}
-                                    className="btn-secondary w-full md:w-auto flex items-center justify-center gap-2 py-2.5 px-6 text-sm font-semibold border-blue-200 text-blue-700 hover:bg-blue-50"
+                                    className="flex-1 md:flex-none btn-secondary flex items-center justify-center gap-2 py-2.5 px-4 text-sm font-semibold border-blue-200 text-blue-700 hover:bg-blue-50 min-w-0"
                                     title="Edit Pesanan"
                                 >
                                     <Edit className="w-4 h-4" />
-                                    Edit
+                                    <span className="inline">Edit</span>
                                 </button>
 
                                 {/* Delete Button */}
                                 <button
                                     onClick={() => handleDelete(order)}
-                                    className="btn-secondary w-full md:w-auto flex items-center justify-center gap-2 py-2.5 px-6 text-sm font-semibold border-red-200 text-red-700 hover:bg-red-50"
+                                    className="flex-1 md:flex-none btn-secondary flex items-center justify-center gap-1.5 py-2 px-4 text-xs font-semibold border-red-200 text-red-700 hover:bg-red-50 min-w-0"
                                     title="Hapus Pesanan"
                                 >
-                                    <Trash2 className="w-4 h-4" />
-                                    Hapus
+                                    <Trash2 className="w-3.5 h-3.5" />
+                                    <span className="hidden lg:inline">Hapus</span>
                                 </button>
 
                                 {order.status !== 'ready' && order.status !== 'completed' && (
                                     <button
                                         onClick={() => handleComplete(order)}
                                         disabled={sendingId === order.id}
-                                        className="btn-primary w-full md:w-auto flex items-center justify-center gap-3 py-3 px-8 text-base font-semibold"
+                                        className="flex-1 md:flex-none btn-primary flex items-center justify-center gap-2 py-2 px-5 text-sm font-semibold min-w-[120px]"
                                     >
                                         {sendingId === order.id ? (
                                             <>
-                                                <Loader2 className="w-5 h-5 animate-spin" />
-                                                Mengirim...
+                                                <Loader2 className="w-4 h-4 animate-spin" />
+                                                <span className="hidden sm:inline">Kirim...</span>
                                             </>
                                         ) : (
                                             <>
-                                                <CheckCircle className="w-5 h-5" />
-                                                Selesai & Kirim WA
+                                                <CheckCircle className="w-4 h-4" />
+                                                <span className="whitespace-nowrap">Kirim WA</span>
                                             </>
                                         )}
                                     </button>
@@ -463,17 +479,17 @@ export default function OrderList() {
                                     <button
                                         onClick={() => handleComplete(order)}
                                         disabled={sendingId === order.id}
-                                        className="btn-secondary w-full md:w-auto flex items-center justify-center gap-3 py-3 px-8 text-base font-semibold border-emerald-200 text-emerald-700 hover:bg-emerald-50"
+                                        className="flex-1 md:flex-none btn-secondary flex items-center justify-center gap-2 py-2 px-5 text-sm font-semibold border-emerald-200 text-emerald-700 hover:bg-emerald-50 min-w-[120px]"
                                     >
                                         {sendingId === order.id ? (
                                             <>
-                                                <Loader2 className="w-5 h-5 animate-spin" />
-                                                Menyimpan...
+                                                <Loader2 className="w-4 h-4 animate-spin" />
+                                                <span className="hidden sm:inline">Proses...</span>
                                             </>
                                         ) : (
                                             <>
-                                                <CheckCircle className="w-5 h-5" />
-                                                Pesanan Diambil
+                                                <CheckCircle className="w-4 h-4" />
+                                                <span className="whitespace-nowrap">Diambil</span>
                                             </>
                                         )}
                                     </button>
@@ -538,6 +554,12 @@ export default function OrderList() {
                 title={confirmModal.title}
                 message={confirmModal.message}
                 isDangerous={confirmModal.isDangerous}
+            />
+            {/* Invoice Modal */}
+            <InvoiceModal
+                isOpen={!!selectedInvoiceOrder}
+                onClose={() => setSelectedInvoiceOrder(null)}
+                order={selectedInvoiceOrder}
             />
         </div>
     );

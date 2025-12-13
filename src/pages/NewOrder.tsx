@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
-import { Save, Loader2, Calculator, Scale, User, Phone, CheckCircle2, Clock } from 'lucide-react';
+import { Save, Loader2, Calculator, Scale, User, Phone, CheckCircle2, Clock, Ticket } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { getApiUrl } from '../lib/api';
 
@@ -20,6 +20,7 @@ export default function NewOrder() {
     const [selectedService, setSelectedService] = useState<Service | null>(null);
     const [suggestions, setSuggestions] = useState<any[]>([]);
     const [showSuggestions, setShowSuggestions] = useState(false);
+    const [discount, setDiscount] = useState(0);
 
     const [formData, setFormData] = useState({
         customer_name: '',
@@ -34,10 +35,11 @@ export default function NewOrder() {
 
     useEffect(() => {
         if (selectedService) {
-            const calculatedPrice = selectedService.price_per_unit * formData.weight;
-            setFormData(prev => ({ ...prev, price: calculatedPrice }));
+            const basePrice = selectedService.price_per_unit * formData.weight;
+            const finalPrice = Math.max(0, basePrice - discount);
+            setFormData(prev => ({ ...prev, price: finalPrice }));
         }
-    }, [selectedService, formData.weight]);
+    }, [selectedService, formData.weight, discount]);
 
     const fetchServices = async () => {
         try {
@@ -133,14 +135,16 @@ export default function NewOrder() {
                     service_type: selectedService.name,
                     target_completion_time: targetTime.toISOString(),
                     status: 'processing',
-                    price: formData.price
+                    price: formData.price,
+                    discount: discount
                 });
 
             if (error) throw error;
 
             // 3. Send WhatsApp Notification
             const trackingLink = `${window.location.origin}/track?inv=${invoice_number}`;
-            const message = `Halo Kak ${formData.customer_name}! 👋\n\nTerima kasih sudah mempercayakan laundry kamu di sini.\n\nNo. Nota: *${invoice_number}*\nLayanan: ${selectedService.name}\nEstimasi Selesai: ${targetTime.toLocaleString('id-ID', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}\nTotal: Rp ${formData.price.toLocaleString('id-ID')}\n\nCek status laundry kamu di sini:\n${trackingLink}\n\nKami akan kabari lagi jika sudah selesai ya! 🧺✨`;
+            const discountMsg = discount > 0 ? `\nDiskon: -Rp ${discount.toLocaleString('id-ID')}` : '';
+            const message = `Halo Kak ${formData.customer_name}! 👋\n\nTerima kasih sudah mempercayakan laundry kamu di sini.\n\nNo. Nota: *${invoice_number}*\nLayanan: ${selectedService.name}\nEstimasi Selesai: ${targetTime.toLocaleString('id-ID', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}${discountMsg}\nTotal: Rp ${formData.price.toLocaleString('id-ID')}\n\nCek status laundry kamu di sini:\n${trackingLink}\n\nKami akan kabari lagi jika sudah selesai ya! 🧺✨`;
 
             const phoneNumbers = formData.customer_phone.split(/[\/,]+/).map(p => p.trim());
 
@@ -314,9 +318,27 @@ export default function NewOrder() {
                     </div>
 
                     <div className="space-y-3">
-                        <label className="text-base font-semibold text-slate-700">Total Harga Estimasi</label>
+                        <label className="text-base font-semibold text-slate-700">Diskon (Rp)</label>
+                        <div className="relative">
+                            <Ticket className="absolute left-5 top-1/2 -translate-y-1/2 w-6 h-6 text-slate-400" />
+                            <input
+                                type="number"
+                                min="0"
+                                value={discount}
+                                onChange={e => setDiscount(Number(e.target.value))}
+                                className="input-field !pl-20 text-xl font-semibold bg-emerald-50/30"
+                                placeholder="0"
+                            />
+                        </div>
+                    </div>
+
+                    <div className="space-y-3 md:col-span-2">
+                        <label className="text-base font-semibold text-slate-700">Total Harga Akhir</label>
                         <div className="w-full bg-slate-50 border border-slate-200 rounded-xl px-6 py-4 flex items-center justify-between group hover:border-emerald-500/30 transition-colors">
-                            <span className="text-slate-500 text-base font-medium">Total</span>
+                            <span className="text-slate-500 text-base font-medium flex items-center gap-2">
+                                Total
+                                {discount > 0 && <span className="text-xs text-emerald-600 bg-emerald-100 px-2 py-0.5 rounded-full font-bold">Hemat Rp {discount.toLocaleString('id-ID')}</span>}
+                            </span>
                             <span className="text-emerald-600 font-bold text-2xl">
                                 Rp {formData.price.toLocaleString('id-ID')}
                             </span>

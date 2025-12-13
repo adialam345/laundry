@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
-import { Save, Loader2, Calculator, Scale, User, Phone, CheckCircle2, Clock, ArrowLeft } from 'lucide-react';
+import { Save, Loader2, Calculator, Scale, User, Phone, CheckCircle2, Clock, ArrowLeft, Printer, Ticket } from 'lucide-react';
 import toast from 'react-hot-toast';
+import InvoiceModal from '../components/InvoiceModal';
 
 interface Service {
     id: string;
@@ -21,6 +22,7 @@ interface Order {
     status: string;
     price: number;
     target_completion_time: string;
+    discount?: number; // Optional until migration applied
 }
 
 export default function EditOrder() {
@@ -33,6 +35,8 @@ export default function EditOrder() {
     const [suggestions, setSuggestions] = useState<any[]>([]);
     const [showSuggestions, setShowSuggestions] = useState(false);
     const [originalOrder, setOriginalOrder] = useState<Order | null>(null);
+    const [showInvoice, setShowInvoice] = useState(false);
+    const [discount, setDiscount] = useState(0);
 
     const [formData, setFormData] = useState({
         customer_name: '',
@@ -49,10 +53,11 @@ export default function EditOrder() {
 
     useEffect(() => {
         if (selectedService) {
-            const calculatedPrice = selectedService.price_per_unit * formData.weight;
-            setFormData(prev => ({ ...prev, price: calculatedPrice }));
+            const basePrice = selectedService.price_per_unit * formData.weight;
+            const finalPrice = Math.max(0, basePrice - discount);
+            setFormData(prev => ({ ...prev, price: finalPrice }));
         }
-    }, [selectedService, formData.weight]);
+    }, [selectedService, formData.weight, discount]);
 
     const fetchOrder = async () => {
         if (!id) return;
@@ -71,10 +76,19 @@ export default function EditOrder() {
                 setFormData({
                     customer_name: data.customer_name,
                     customer_phone: data.customer_phone,
-                    weight: 1, // We'll calculate this from price
+                    weight: 1, // Will be recalculated
                     price: data.price,
                     status: data.status
                 });
+
+                if (data.discount) {
+                    setDiscount(data.discount);
+                } else {
+                    // Try to infer discount if not saved explicitly (backward compatibility)
+                    // Wait until services loaded to infer? 
+                    // Simpler: assume 0 if column is null
+                    setDiscount(0);
+                }
             }
         } catch (error: any) {
             console.error('Error fetching order:', error);
@@ -109,7 +123,9 @@ export default function EditOrder() {
             if (service) {
                 setSelectedService(service);
                 // Calculate weight from price
-                const weight = originalOrder.price / service.price_per_unit;
+                // Calculate weight from price + discount
+                const originalTotal = originalOrder.price + (originalOrder.discount || 0);
+                const weight = originalTotal / service.price_per_unit;
                 setFormData(prev => ({ ...prev, weight }));
             }
         }
@@ -180,7 +196,9 @@ export default function EditOrder() {
                     service_type: selectedService.name,
                     target_completion_time: targetTime.toISOString(),
                     status: formData.status,
-                    price: formData.price
+                    status: formData.status,
+                    price: formData.price,
+                    discount: discount
                 })
                 .eq('id', id);
 
@@ -206,7 +224,7 @@ export default function EditOrder() {
 
     return (
         <div className="page-container max-w-5xl">
-            <div className="page-header">
+            <div className="page-header flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                 <div>
                     <button
                         onClick={() => navigate('/admin/orders')}
@@ -218,6 +236,14 @@ export default function EditOrder() {
                     <h1 className="page-title">Edit Pesanan</h1>
                     <p className="page-subtitle">Update data pesanan {originalOrder?.invoice_number}</p>
                 </div>
+                <button
+                    onClick={() => setShowInvoice(true)}
+                    className="btn-secondary flex items-center gap-2 py-2 px-4 text-sm"
+                    disabled={!originalOrder}
+                >
+                    <Printer className="w-4 h-4" />
+                    Cetak Struk
+                </button>
             </div>
 
             <form onSubmit={handleSubmit} className="glass-panel rounded-2xl p-10 space-y-10 animate-in slide-in-from-bottom-4 duration-500">
@@ -386,9 +412,27 @@ export default function EditOrder() {
                     </div>
 
                     <div className="space-y-3">
-                        <label className="text-base font-semibold text-slate-700">Total Harga</label>
+                        <label className="text-base font-semibold text-slate-700">Diskon (Rp)</label>
+                        <div className="relative">
+                            <Ticket className="absolute left-5 top-1/2 -translate-y-1/2 w-6 h-6 text-slate-400" />
+                            <input
+                                type="number"
+                                min="0"
+                                value={discount}
+                                onChange={e => setDiscount(Number(e.target.value))}
+                                className="input-field !pl-20 text-xl font-semibold bg-emerald-50/30"
+                                placeholder="0"
+                            />
+                        </div>
+                    </div>
+
+                    <div className="space-y-3 md:col-span-2">
+                        <label className="text-base font-semibold text-slate-700">Total Harga Akhir</label>
                         <div className="w-full bg-slate-50 border border-slate-200 rounded-xl px-6 py-4 flex items-center justify-between group hover:border-emerald-500/30 transition-colors">
-                            <span className="text-slate-500 text-base font-medium">Total</span>
+                            <span className="text-slate-500 text-base font-medium flex items-center gap-2">
+                                Total
+                                {discount > 0 && <span className="text-xs text-emerald-600 bg-emerald-100 px-2 py-0.5 rounded-full font-bold">Hemat Rp {discount.toLocaleString('id-ID')}</span>}
+                            </span>
                             <span className="text-emerald-600 font-bold text-2xl">
                                 Rp {formData.price.toLocaleString('id-ID')}
                             </span>
@@ -413,7 +457,13 @@ export default function EditOrder() {
                         Update Pesanan
                     </button>
                 </div>
-            </form>
-        </div>
+            </form >
+
+            <InvoiceModal
+                isOpen={showInvoice}
+                onClose={() => setShowInvoice(false)}
+                order={originalOrder}
+            />
+        </div >
     );
 }

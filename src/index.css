@@ -117,3 +117,45 @@
         scrollbar-width: none;
     }
 }
+
+@media print {
+    body * {
+        visibility: hidden;
+    }
+
+    .printable-content,
+    .printable-content * {
+        visibility: visible;
+    }
+
+    .printable-content {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+        max-width: 80mm;
+        /* Limit width for thermal printer */
+        margin: 0;
+        padding: 0;
+        box-shadow: none !important;
+        font-size: 12px;
+        /* Smaller font for receipts */
+    }
+
+    .no-print {
+        display: none !important;
+    }
+
+    /* Reset page margins for thermal printer */
+    @page {
+        size: 80mm auto;
+        /* Set paper size for 80mm printer, auto height */
+        margin: 0mm;
+    }
+
+    /* Hide browser default header/footers */
+    @page {
+        margin-top: 0;
+        margin-bottom: 0;
+    }
+}

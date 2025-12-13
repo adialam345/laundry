@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { supabase } from '../lib/supabase';
 import { Plus, Trash2, Save, Loader2, Settings as SettingsIcon, Edit2, X, Clock, Tag, FileText } from 'lucide-react';
 import toast from 'react-hot-toast';
@@ -136,8 +137,8 @@ export default function Settings() {
                 </button>
             </div>
 
-            {isEditing && (
-                <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm flex items-center justify-center p-4 z-50 animate-in fade-in duration-200">
+            {isEditing && createPortal(
+                <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 z-[9999] animate-in fade-in duration-200">
                     <div className="glass-panel bg-white w-full max-w-xl shadow-2xl animate-in zoom-in-95 duration-200 p-8">
                         <div className="flex justify-between items-center mb-8 border-b border-slate-100 pb-6">
                             <h2 className="text-2xl font-bold text-slate-900 flex items-center gap-3">
@@ -231,7 +232,8 @@ export default function Settings() {
                             </div>
                         </form>
                     </div>
-                </div>
+                </div>,
+                document.body
             )}
 
             {loading ? (

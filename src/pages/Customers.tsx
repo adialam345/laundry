@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { supabase } from '../lib/supabase';
 import { Search, User, Phone, Calendar, Loader2, Edit, Trash2, X, Save } from 'lucide-react';
 import { useInfiniteScroll } from '../hooks/useInfiniteScroll';
@@ -204,7 +205,7 @@ export default function Customers() {
                                         </div>
                                     </td>
                                     <td className="px-8 py-5 text-right">
-                                        <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                        <div className="flex items-center justify-end gap-2">
                                             <button
                                                 onClick={() => handleEditClick(customer)}
                                                 className="p-2 text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 rounded-lg transition-colors"
@@ -245,8 +246,9 @@ export default function Customers() {
             </div>
 
             {/* Edit Modal */}
-            {editingCustomer && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm animate-in fade-in duration-200">
+            {/* Edit Modal */}
+            {editingCustomer && createPortal(
+                <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-200">
                     <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden animate-in zoom-in-95 duration-200">
                         <div className="p-6 border-b border-slate-100 flex justify-between items-center">
                             <h3 className="text-xl font-bold text-slate-900">Edit Pelanggan</h3>
@@ -303,7 +305,8 @@ export default function Customers() {
                             </div>
                         </form>
                     </div>
-                </div>
+                </div>,
+                document.body
             )}
 
             {/* Delete Confirmation Modal */}

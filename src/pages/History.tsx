@@ -3,6 +3,7 @@ import { supabase } from '../lib/supabase';
 import { CheckCircle, Search, Calendar, FileText, DollarSign, Loader2, Filter } from 'lucide-react';
 import { useInfiniteScroll } from '../hooks/useInfiniteScroll';
 import CustomSelect from '../components/CustomSelect';
+import InvoiceModal from '../components/InvoiceModal';
 
 interface Order {
     id: string;
@@ -28,6 +29,7 @@ export default function OrderHistory() {
     // Filter States
     const [selectedMonth, setSelectedMonth] = useState<string>(new Date().getMonth().toString());
     const [selectedYear, setSelectedYear] = useState<string>(new Date().getFullYear().toString());
+    const [selectedInvoiceOrder, setSelectedInvoiceOrder] = useState<Order | null>(null);
 
     const ITEMS_PER_PAGE = 10;
 
@@ -186,7 +188,11 @@ export default function OrderHistory() {
                             </thead>
                             <tbody className="divide-y divide-slate-100">
                                 {filteredOrders.map((order) => (
-                                    <tr key={order.id} className="hover:bg-slate-50/50 transition-colors group">
+                                    <tr
+                                        key={order.id}
+                                        className="hover:bg-slate-50/50 transition-colors group cursor-pointer"
+                                        onClick={() => setSelectedInvoiceOrder(order)}
+                                    >
                                         <td className="py-4 px-6">
                                             <div className="flex items-center gap-3">
                                                 <div className="p-2 bg-emerald-50 rounded-lg text-emerald-600 group-hover:bg-emerald-100 transition-colors">
@@ -255,6 +261,13 @@ export default function OrderHistory() {
                     )}
                 </div>
             )}
+
+            {/* Invoice Modal */}
+            <InvoiceModal
+                isOpen={!!selectedInvoiceOrder}
+                onClose={() => setSelectedInvoiceOrder(null)}
+                order={selectedInvoiceOrder}
+            />
         </div>
     );
 }
