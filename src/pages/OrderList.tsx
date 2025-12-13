@@ -421,9 +421,15 @@ export default function OrderList() {
                                             <span className="text-emerald-600 font-semibold truncate max-w-[180px] block">{order.service_type}</span>
                                             <span className="text-slate-300">|</span>
                                         </div>
-                                        <span className="flex items-center gap-1.5 whitespace-nowrap"><Phone className="w-3.5 h-3.5" /> {order.customer_phone}</span>
+                                        <span className="flex items-center gap-1.5 whitespace-nowrap">
+                                            <Phone className="w-3 h-3 text-slate-400" />
+                                            {order.customer_phone}
+                                        </span>
                                         <span className="hidden sm:inline text-slate-300">|</span>
-                                        <span className="flex items-center gap-1.5 whitespace-nowrap"><Calendar className="w-3.5 h-3.5" /> Est: {new Date(order.target_completion_time).toLocaleString('id-ID', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}</span>
+                                        <span className="flex items-center gap-1.5 whitespace-nowrap">
+                                            <Calendar className="w-3 h-3 text-slate-400" />
+                                            Est: {new Date(order.target_completion_time).toLocaleString('id-ID', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}
+                                        </span>
                                     </div>
                                 </div>
                             </div>
