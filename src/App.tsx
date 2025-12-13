@@ -3,6 +3,7 @@ import Layout from './layouts/Layout';
 import Dashboard from './pages/Dashboard';
 import WhatsAppPage from './pages/WhatsAppPage';
 import NewOrder from './pages/NewOrder';
+import EditOrder from './pages/EditOrder';
 import OrderList from './pages/OrderList';
 import OrderHistory from './pages/History';
 import Customers from './pages/Customers';
@@ -29,6 +30,7 @@ function App() {
             <Route path="dashboard" element={<Dashboard />} />
             <Route path="new-order" element={<NewOrder />} />
             <Route path="orders" element={<OrderList />} />
+            <Route path="orders/edit/:id" element={<EditOrder />} />
             <Route path="history" element={<OrderHistory />} />
             <Route path="customers" element={<Customers />} />
             <Route path="whatsapp" element={<WhatsAppPage />} />

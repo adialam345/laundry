@@ -1,10 +1,11 @@
 import { useEffect, useState } from 'react';
 import { supabase } from '../lib/supabase';
-import { CheckCircle, Clock, Loader2, Search, Phone, Calendar, CheckSquare, Square, Send } from 'lucide-react';
+import { CheckCircle, Clock, Loader2, Search, Phone, Calendar, CheckSquare, Square, Send, Edit, Trash2 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import ConfirmModal from '../components/ConfirmModal';
 import { useInfiniteScroll } from '../hooks/useInfiniteScroll';
 import { getApiUrl } from '../lib/api';
+import { useNavigate } from 'react-router-dom';
 
 interface Order {
     id: string;
@@ -19,6 +20,7 @@ interface Order {
 }
 
 export default function OrderList() {
+    const navigate = useNavigate();
     const [orders, setOrders] = useState<Order[]>([]);
     const [loading, setLoading] = useState(true);
     const [sendingId, setSendingId] = useState<string | null>(null);
@@ -289,6 +291,34 @@ export default function OrderList() {
         });
     };
 
+    const handleEdit = (orderId: string) => {
+        navigate(`/admin/orders/edit/${orderId}`);
+    };
+
+    const handleDelete = async (order: Order) => {
+        setConfirmModal({
+            isOpen: true,
+            title: 'Hapus Pesanan',
+            message: `Apakah Anda yakin ingin menghapus pesanan ${order.invoice_number} milik ${order.customer_name}? Tindakan ini tidak dapat dibatalkan.`,
+            isDangerous: true,
+            onConfirm: async () => {
+                setConfirmModal(prev => ({ ...prev, isOpen: false }));
+                try {
+                    const { error } = await supabase
+                        .from('laundry_orders')
+                        .delete()
+                        .eq('id', order.id);
+
+                    if (error) throw error;
+                    toast.success('Pesanan berhasil dihapus');
+                    fetchOrders(0, true);
+                } catch (error: any) {
+                    toast.error('Gagal menghapus pesanan: ' + error.message);
+                }
+            }
+        });
+    };
+
     const filteredOrders = orders.filter(order =>
         order.customer_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
         order.invoice_number.toLowerCase().includes(searchTerm.toLowerCase())
@@ -388,7 +418,27 @@ export default function OrderList() {
                                 </div>
                             </div>
 
-                            <div className="w-full md:w-auto flex flex-col md:flex-row items-center gap-4 pl-12 md:pl-0">
+                            <div className="w-full md:w-auto flex flex-col md:flex-row items-center gap-3 pl-12 md:pl-0">
+                                {/* Edit Button */}
+                                <button
+                                    onClick={() => handleEdit(order.id)}
+                                    className="btn-secondary w-full md:w-auto flex items-center justify-center gap-2 py-2.5 px-6 text-sm font-semibold border-blue-200 text-blue-700 hover:bg-blue-50"
+                                    title="Edit Pesanan"
+                                >
+                                    <Edit className="w-4 h-4" />
+                                    Edit
+                                </button>
+
+                                {/* Delete Button */}
+                                <button
+                                    onClick={() => handleDelete(order)}
+                                    className="btn-secondary w-full md:w-auto flex items-center justify-center gap-2 py-2.5 px-6 text-sm font-semibold border-red-200 text-red-700 hover:bg-red-50"
+                                    title="Hapus Pesanan"
+                                >
+                                    <Trash2 className="w-4 h-4" />
+                                    Hapus
+                                </button>
+
                                 {order.status !== 'ready' && order.status !== 'completed' && (
                                     <button
                                         onClick={() => handleComplete(order)}
