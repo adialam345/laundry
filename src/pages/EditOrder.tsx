@@ -21,6 +21,8 @@ interface Order {
     service_type: string;
     status: string;
     price: number;
+    weight: number;
+    unit_type?: string;
     target_completion_time: string;
     discount?: number; // Optional until migration applied
 }
@@ -76,7 +78,7 @@ export default function EditOrder() {
                 setFormData({
                     customer_name: data.customer_name,
                     customer_phone: data.customer_phone,
-                    weight: 1, // Will be recalculated
+                    weight: data.weight || 1,
                     price: data.price,
                     status: data.status
                 });
@@ -122,11 +124,6 @@ export default function EditOrder() {
             const service = services.find(s => s.name === originalOrder.service_type);
             if (service) {
                 setSelectedService(service);
-                // Calculate weight from price
-                // Calculate weight from price + discount
-                const originalTotal = originalOrder.price + (originalOrder.discount || 0);
-                const weight = originalTotal / service.price_per_unit;
-                setFormData(prev => ({ ...prev, weight }));
             }
         }
     }, [originalOrder, services]);
@@ -196,8 +193,9 @@ export default function EditOrder() {
                     service_type: selectedService.name,
                     target_completion_time: targetTime.toISOString(),
                     status: formData.status,
-                    status: formData.status,
                     price: formData.price,
+                    weight: formData.weight,
+                    unit_type: selectedService.unit_type,
                     discount: discount
                 })
                 .eq('id', id);
@@ -416,10 +414,13 @@ export default function EditOrder() {
                         <div className="relative">
                             <Ticket className="absolute left-5 top-1/2 -translate-y-1/2 w-6 h-6 text-slate-400" />
                             <input
-                                type="number"
-                                min="0"
-                                value={discount}
-                                onChange={e => setDiscount(Number(e.target.value))}
+                                type="text"
+                                inputMode="numeric"
+                                value={discount === 0 ? '' : discount}
+                                onChange={e => {
+                                    const val = e.target.value.replace(/\D/g, '');
+                                    setDiscount(val ? parseInt(val) : 0);
+                                }}
                                 className="input-field !pl-20 text-xl font-semibold bg-emerald-50/30"
                                 placeholder="0"
                             />

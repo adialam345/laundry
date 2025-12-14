@@ -136,6 +136,8 @@ export default function NewOrder() {
                     target_completion_time: targetTime.toISOString(),
                     status: 'processing',
                     price: formData.price,
+                    weight: formData.weight,
+                    unit_type: selectedService.unit_type,
                     discount: discount
                 });
 
@@ -322,10 +324,13 @@ export default function NewOrder() {
                         <div className="relative">
                             <Ticket className="absolute left-5 top-1/2 -translate-y-1/2 w-6 h-6 text-slate-400" />
                             <input
-                                type="number"
-                                min="0"
-                                value={discount}
-                                onChange={e => setDiscount(Number(e.target.value))}
+                                type="text"
+                                inputMode="numeric"
+                                value={discount === 0 ? '' : discount}
+                                onChange={e => {
+                                    const val = e.target.value.replace(/\D/g, '');
+                                    setDiscount(val ? parseInt(val) : 0);
+                                }}
                                 className="input-field !pl-20 text-xl font-semibold bg-emerald-50/30"
                                 placeholder="0"
                             />

@@ -70,7 +70,7 @@ export default function InvoiceModal({ isOpen, onClose, order }: InvoiceModalPro
                             <div className="flex justify-between items-start mb-2">
                                 <div className="flex-1 pr-2">
                                     <p className="font-bold mb-0.5">{order.service_type}</p>
-                                    {order.weight > 1 && <p className="text-[10px] text-slate-500">{order.weight} {order.unit_type} x @{((order.price + (order.discount || 0)) / order.weight).toLocaleString('id-ID')}</p>}
+                                    <p className="text-[10px] text-slate-500">{order.weight} {order.unit_type || 'kg'} x @{((order.price + (order.discount || 0)) / order.weight).toLocaleString('id-ID')}</p>
                                 </div>
                                 <div className="text-right whitespace-nowrap font-bold">
                                     {((order.price + (order.discount || 0))).toLocaleString('id-ID')}
