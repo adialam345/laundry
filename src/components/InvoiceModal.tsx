@@ -41,7 +41,7 @@ export default function InvoiceModal({ isOpen, onClose, order }: InvoiceModalPro
 
                 {/* Printable Area - Optimized for 80mm Thermal Printer */}
                 <div className="p-6 bg-slate-200/50 max-h-[80vh] overflow-y-auto custom-scrollbar flex justify-center">
-                    <div className="printable-content bg-white p-[4mm] shadow-sm text-slate-900 font-mono text-[12px] leading-tight w-[80mm]">
+                    <div className="printable-content bg-white px-[3mm] py-[4mm] shadow-sm text-slate-900 font-mono text-[12px] leading-tight w-[80mm]">
                         {/* Receipt Header */}
                         <div className="text-center mb-4">
                             <h1 className="font-bold text-lg mb-1 uppercase tracking-wider">Laundry Antarixa</h1>
@@ -52,15 +52,15 @@ export default function InvoiceModal({ isOpen, onClose, order }: InvoiceModalPro
                         {/* Order Info */}
                         <div className="border-b border-dashed border-slate-400 pb-2 mb-2 space-y-1">
                             <div className="flex justify-between">
-                                <span className="text-slate-600">Nota</span>
+                                <span className="text-slate-600">Invoice</span>
                                 <span className="font-bold">{order.invoice_number}</span>
                             </div>
                             <div className="flex justify-between">
-                                <span className="text-slate-600">Tgl</span>
+                                <span className="text-slate-600">Tanggal</span>
                                 <span>{new Date(order.created_at || new Date()).toLocaleDateString('id-ID', { day: 'numeric', month: 'numeric', year: '2-digit', hour: '2-digit', minute: '2-digit' })}</span>
                             </div>
                             <div className="flex justify-between">
-                                <span className="text-slate-600">Plg</span>
+                                <span className="text-slate-600">Pelanggan</span>
                                 <span className="font-bold uppercase truncate max-w-[120px] text-right">{order.customer_name}</span>
                             </div>
                         </div>

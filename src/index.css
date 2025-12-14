@@ -132,11 +132,10 @@
         position: absolute;
         left: 0;
         top: 0;
-        width: 100%;
-        max-width: 80mm;
-        /* Limit width for thermal printer */
+        width: 80mm !important;
+        /* Force 80mm width for receipt paper */
         margin: 0;
-        padding: 0;
+        /* Padding is handled by utility classes */
         box-shadow: none !important;
         font-size: 12px;
         /* Smaller font for receipts */
