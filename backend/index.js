@@ -184,19 +184,27 @@ app.post('/api/pair', async (c) => {
 
 app.post('/api/send', async (c) => {
   try {
-    const { phone, message } = await c.req.json();
+    const { phone, message, image } = await c.req.json();
 
     if (!isConnected) {
       return c.json({ success: false, error: 'WhatsApp not connected' }, 503);
     }
 
-    if (!phone || !message) {
-      return c.json({ success: false, error: 'Phone and message are required' }, 400);
+    if (!phone || (!message && !image)) {
+      return c.json({ success: false, error: 'Phone and message/image are required' }, 400);
     }
 
     const jid = phone.includes('@s.whatsapp.net') ? phone : `${phone}@s.whatsapp.net`;
 
-    await sock.sendMessage(jid, { text: message });
+    if (image) {
+      // Handle image sending
+      const cleanBase64 = image.replace(/^data:image\/\w+;base64,/, "");
+      const buffer = Buffer.from(cleanBase64, 'base64');
+      await sock.sendMessage(jid, { image: buffer, caption: message });
+    } else {
+      // Text only
+      await sock.sendMessage(jid, { text: message });
+    }
 
     return c.json({
       success: true,

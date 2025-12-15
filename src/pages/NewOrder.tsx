@@ -3,7 +3,9 @@ import { useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import { Save, Loader2, Calculator, Scale, User, Phone, CheckCircle2, Clock, Ticket } from 'lucide-react';
 import toast from 'react-hot-toast';
+import html2canvas from 'html2canvas';
 import { getApiUrl } from '../lib/api';
+import { InvoiceReceipt } from '../components/InvoiceReceipt';
 
 interface Service {
     id: string;
@@ -21,6 +23,8 @@ export default function NewOrder() {
     const [suggestions, setSuggestions] = useState<any[]>([]);
     const [showSuggestions, setShowSuggestions] = useState(false);
     const [discount, setDiscount] = useState(0);
+    const [tempOrder, setTempOrder] = useState<any>(null);
+    const receiptRef = React.useRef<HTMLDivElement>(null);
 
     const [formData, setFormData] = useState({
         customer_name: '',
@@ -121,43 +125,79 @@ export default function NewOrder() {
                 console.error('Error saving customer:', customerError);
             }
 
-            // 2. Create Order
+            // 2. Prepare Order Data & Capture Receipt
             const invoice_number = generateInvoiceNumber();
             const targetTime = new Date();
             targetTime.setHours(targetTime.getHours() + selectedService.duration_hours);
 
-            const { error } = await supabase
-                .from('laundry_orders')
-                .insert({
-                    invoice_number,
-                    customer_name: formData.customer_name,
-                    customer_phone: formData.customer_phone,
-                    service_type: selectedService.name,
-                    target_completion_time: targetTime.toISOString(),
-                    status: 'processing',
-                    price: formData.price,
-                    weight: formData.weight,
-                    unit_type: selectedService.unit_type,
-                    discount: discount
-                });
+            const newOrderData = {
+                invoice_number,
+                customer_name: formData.customer_name,
+                customer_phone: formData.customer_phone,
+                service_type: selectedService.name,
+                target_completion_time: targetTime.toISOString(),
+                status: 'processing',
+                price: formData.price,
+                weight: formData.weight,
+                unit_type: selectedService.unit_type,
+                discount: discount,
+                created_at: new Date().toISOString() // for receipt date
+            };
+
+            // Trigger render of hidden receipt
+            setTempOrder(newOrderData);
+
+            // Wait for render
+            await new Promise(resolve => setTimeout(resolve, 500));
+
+            let imageBase64 = null;
+            if (receiptRef.current) {
+                try {
+                    const canvas = await html2canvas(receiptRef.current, {
+                        scale: 2,
+                        backgroundColor: '#ffffff',
+                        logging: false
+                    });
+                    imageBase64 = canvas.toDataURL('image/jpeg', 0.8);
+                } catch (err) {
+                    console.error('Failed to capture receipt:', err);
+                }
+            }
+
+            // 3. Save to Supabase
+            const { error } = await supabase.from('laundry_orders').insert({
+                invoice_number,
+                customer_name: formData.customer_name,
+                customer_phone: formData.customer_phone,
+                service_type: selectedService.name,
+                target_completion_time: targetTime.toISOString(),
+                status: 'processing',
+                price: formData.price,
+                weight: formData.weight,
+                unit_type: selectedService.unit_type,
+                discount: discount
+            });
 
             if (error) throw error;
 
-            // 3. Send WhatsApp Notification
+            // 4. Send WhatsApp Notification
             const trackingLink = `${window.location.origin}/track?inv=${invoice_number}`;
-            const discountMsg = discount > 0 ? `\nDiskon: -Rp ${discount.toLocaleString('id-ID')}` : '';
-            const message = `Halo Kak ${formData.customer_name}! 👋\n\nTerima kasih sudah mempercayakan laundry kamu di sini.\n\nNo. Nota: *${invoice_number}*\nLayanan: ${selectedService.name}\nEstimasi Selesai: ${targetTime.toLocaleString('id-ID', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}${discountMsg}\nTotal: Rp ${formData.price.toLocaleString('id-ID')}\n\nCek status laundry kamu di sini:\n${trackingLink}\n\nKami akan kabari lagi jika sudah selesai ya! 🧺✨`;
+            const message = `Halo Kak ${formData.customer_name}! 👋\n\nTerima kasih sudah mempercayakan laundry kamu di sini.\n\nBerikut foto struk resminya 👇\n\nNo. Nota: *${invoice_number}*\nLayanan: ${selectedService.name}\nEstimasi Selesai: ${targetTime.toLocaleString('id-ID', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}\n\nCek status laundry: ${trackingLink}\n\nKami akan kabari lagi jika sudah selesai! 🧺✨`;
 
             const phoneNumbers = formData.customer_phone.split(/[\/,]+/).map(p => p.trim());
 
-            // Send to all numbers without blocking the UI flow too much
+            // Send to all numbers
             Promise.all(phoneNumbers.map(async (phone) => {
                 if (!phone) return;
                 try {
                     await fetch(getApiUrl('/api/send'), {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ phone, message })
+                        body: JSON.stringify({
+                            phone,
+                            message,
+                            image: imageBase64 // Send the captured image
+                        })
                     });
                 } catch (err) {
                     console.error(`Failed to send WA to ${phone}`, err);
@@ -362,6 +402,16 @@ export default function NewOrder() {
                     </button>
                 </div>
             </form>
+
+            {/* Hidden Receipt for Capture */}
+            <div className="absolute top-0 left-[-9999px]">
+                {tempOrder && (
+                    <InvoiceReceipt
+                        ref={receiptRef}
+                        order={tempOrder}
+                    />
+                )}
+            </div>
         </div>
     );
 }
